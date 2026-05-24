@@ -138,32 +138,53 @@ export const MupdfPage = memo(function MupdfPage({
         style={{ width: cssW, height: cssH, display: "block" }}
       />
 
-      {/* Text layer for selection */}
+      {/* Text layer for selection (HTML-based; WKWebView SVG selection is unreliable) */}
       {textData && (
-        <svg
-          className="mupdf-text-layer"
-          viewBox={`0 0 ${pageWidth} ${pageHeight}`}
-          preserveAspectRatio="none"
-          style={{ width: cssW, height: cssH }}
-        >
-          {textData.blocks.map(
-            (block, bi) =>
-              block.type === "text" &&
-              block.lines.map((line, li) => (
-                <text
-                  key={`${bi}-${li}`}
-                  x={line.bbox.x}
-                  y={line.y}
-                  fontSize={line.font.size}
-                  fontFamily={line.font.family || line.font.name || "serif"}
-                  textLength={line.bbox.w > 0 ? line.bbox.w : undefined}
-                  lengthAdjust="spacingAndGlyphs"
-                >
-                  {line.text}
-                </text>
-              )),
-          )}
-        </svg>
+        <div className="mupdf-text-layer">
+          <div
+            className="mupdf-text-layer-inner"
+            style={{
+              width: `${pageWidth}px`,
+              height: `${pageHeight}px`,
+              transform: `scale(${scale})`,
+            }}
+          >
+            {textData.blocks.map(
+              (block, bi) =>
+                block.type === "text" &&
+                block.lines.map((line, li) => {
+                  const targetW = line.bbox.w > 0 ? line.bbox.w : undefined;
+                  return (
+                    <span
+                      key={`${bi}-${li}`}
+                      ref={(el) => {
+                        if (!el || !targetW) return;
+                        // Fit rendered width to the PDF's bbox width.
+                        // requestAnimationFrame so layout has settled.
+                        requestAnimationFrame(() => {
+                          const measured = el.getBoundingClientRect().width;
+                          if (measured > 0) {
+                            const sx = targetW / (measured / scale);
+                            el.style.transform = `scaleX(${sx})`;
+                          }
+                        });
+                      }}
+                      className="mupdf-text-line"
+                      style={{
+                        left: `${line.bbox.x}px`,
+                        top: `${line.y - line.font.size * 0.8}px`,
+                        fontSize: `${line.font.size}px`,
+                        fontFamily:
+                          line.font.family || line.font.name || "serif",
+                      }}
+                    >
+                      {line.text}
+                    </span>
+                  );
+                }),
+            )}
+          </div>
+        </div>
       )}
 
       {/* Link layer */}

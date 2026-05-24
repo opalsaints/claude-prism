@@ -158,22 +158,54 @@
   scrollbar-color: var(--sidebar-border) transparent;
 }
 
-/* MuPDF text selection layer */
+/* MuPDF text selection layer (HTML, PDF.js-style overlay) */
 .mupdf-text-layer {
   position: absolute;
   inset: 0;
   z-index: 1;
+  overflow: hidden;
   pointer-events: auto;
-}
-
-.mupdf-text-layer text {
-  fill: transparent;
-  white-space: pre;
+  user-select: text;
+  -webkit-user-select: text;
   cursor: text;
 }
 
+.mupdf-text-layer-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.mupdf-text-line {
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  color: transparent;
+  transform-origin: 0 0;
+  user-select: text;
+  -webkit-user-select: text;
+  pointer-events: auto;
+}
+
+.mupdf-text-line::selection {
+  color: transparent;
+  background-color: hsla(220, 100%, 50%, 0.3);
+}
+
+.mupdf-text-line::-moz-selection {
+  color: transparent;
+  background-color: hsla(220, 100%, 50%, 0.3);
+}
+
 .mupdf-text-layer text::selection {
-  fill: hsla(220, 100%, 50%, 0.3);
+  fill: hsla(220, 100%, 50%, 0.45);
+  background-color: hsla(220, 100%, 50%, 0.18);
+}
+
+.mupdf-text-layer text::-moz-selection {
+  fill: hsla(220, 100%, 50%, 0.45);
+  background-color: hsla(220, 100%, 50%, 0.18);
 }
 
 /* MuPDF link overlay layer */

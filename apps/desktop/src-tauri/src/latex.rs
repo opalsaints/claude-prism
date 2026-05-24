@@ -368,7 +368,7 @@ pub(crate) fn compile_with_tectonic(work_dir: &Path, main_file: &str) -> Result<
     let config = PersistentConfig::open(false)
         .map_err(|e| format!("Failed to open tectonic config: {}", e))?;
 
-    let bundle = config.default_bundle(false, &mut status).map_err(|e| {
+    let bundle = config.default_bundle(false).map_err(|e| {
         format!(
             "Failed to load tectonic bundle (check network connection): {}",
             e
